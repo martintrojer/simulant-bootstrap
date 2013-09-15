@@ -1,5 +1,5 @@
 (ns site
-  (:require [compojure.core :refer (defroutes GET PUT)]
+  (:require [compojure.core :refer (defroutes GET PUT DELETE)]
             [compojure.handler :as handler]
             [compojure.route :as route]
             [ring.middleware.edn :as ring-edn]))
@@ -12,6 +12,11 @@
    :headers {"Content-Type" "application/edn"}
    :body (pr-str data)})
 
+(defn get-data [params]
+  (if-let [data (get @store (:id params))]
+    (generate-response data)
+    (generate-response :not-found 400)))
+
 (defn store-data [data]
   (dosync
    (let [id @id-ctr]
@@ -19,15 +24,18 @@
      (alter store assoc (str id) data)
      (generate-response {:id id}))))
 
-(defn get-data [params]
+(defn remove-data [params]
   (if-let [data (get @store (:id params))]
-    (generate-response data)
+    (dosync
+      (alter store dissoc (:id params))
+      (generate-response {:id (:id params)}))
     (generate-response :not-found 400)))
 
 (defroutes app-routes
   (GET "/" [] (generate-response :ok))
-  (PUT "/data" {params :params} (generate-response (store-data params)))
   (GET "/data" {params :params} (generate-response (get-data params)))
+  (PUT "/data" {params :params} (generate-response (store-data params)))
+  (DELETE "/data" {params :params} (generate-response (remove-data params)))
   (route/not-found (generate-response :not-found)))
 
 (def the-site
@@ -37,3 +45,4 @@
 ;; curl -X GET http://localhost:3000
 ;; curl -X PUT -H "Content-Type: application/edn" -d '{:name :barnabas}' http://localhost:3000/data
 ;; curl -X GET http://localhost:3000/data?id=1
+;; curl -X DELETE http://localhost:3000/data?id=1

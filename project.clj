@@ -8,7 +8,9 @@
                  [com.datomic/simulant "0.1.6"]
                  [ring/ring-jetty-adapter "1.2.0"]
                  [fogus/ring-edn "0.2.0"]
-                 [compojure "1.1.5"]]
+                 [compojure "1.1.5"]
+
+                 [clj-http "0.7.6"]]
 
   :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.4"]]
                    :source-paths ["dev"]}}
