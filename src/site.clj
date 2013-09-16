@@ -33,9 +33,9 @@
 
 (defroutes app-routes
   (GET "/" [] (generate-response :ok))
-  (GET "/data" {params :params} (generate-response (get-data params)))
-  (PUT "/data" {params :params} (generate-response (store-data params)))
-  (DELETE "/data" {params :params} (generate-response (remove-data params)))
+  (GET "/data" {params :params} (get-data params))
+  (PUT "/data" {params :params} (store-data params))
+  (DELETE "/data" {params :params} (remove-data params))
   (route/not-found (generate-response :not-found)))
 
 (def the-site

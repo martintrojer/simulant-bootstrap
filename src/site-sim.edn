@@ -14,9 +14,9 @@
     :db/cardinality :db.cardinality/one
     :db.install/_attribute :db.part/db}
    {:db/id #db/id[:db.part/db]
-    :db/ident :model/meanHoursBetweenHits
+    :db/ident :model/meanSecsBetweenHits
     :db/valueType :db.type/long
-    :db/doc "Mean time between api hits in hours (geometric distribution)"
+    :db/doc "Mean time between api hits in seconds (geometric distribution)"
     :db/cardinality :db.cardinality/one
     :db.install/_attribute :db.part/db}]]
 
