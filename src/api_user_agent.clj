@@ -35,7 +35,7 @@
     (swap! my-ids conj id)))
 
 (defn remove-some-data [test]
-  (when-let [id (-> my-ids deref shuffle first)]
+  (when-let [id (rand-nth @my-ids)]
     (delete-data id)
     (swap! my-ids disj id)))
 

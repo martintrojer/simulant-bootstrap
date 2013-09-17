@@ -1,6 +1,6 @@
 {:model
  [[{:db/id #db/id[:db.part/db]
-    :db/ident :model.type/siteTraffic}
+    :db/ident :model.type/siteUsage}
    {:db/id #db/id[:db.part/db]
     :db/ident :model/userCount
     :db/valueType :db.type/long
@@ -22,9 +22,11 @@
 
  :test
  [[{:db/id #db/id[:db.part/db]
-    :db/ident :test.type/putget}
+    :db/ident :test.type/putGetDelte}
    {:db/id #db/id[:db.part/db]
     :db/ident :agent.type/apiUser}
    {:db/id #db/id[:db.part/db]
-    :db/ident :action.type/trade}]]
+    :db/ident :action.type/putGet}
+   {:db/id #db/id[:db.part/db]
+    :db/ident :action.type/delete}]]
  }
