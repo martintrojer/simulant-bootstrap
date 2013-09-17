@@ -11,6 +11,7 @@
    [clojure.string :as str]
    [clojure.test :as test]
    [clojure.tools.namespace.repl :refer (refresh refresh-all)]
+   [clojure.tools.trace :ref (trace deftrace trace-forms trace-ns trace-vars)]
    [ring.adapter.jetty :as jetty]
    [site]))
 

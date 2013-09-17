@@ -50,7 +50,7 @@
 
 (def site-user-model-data
   [{:db/id model-id
-    :model/type :model.type/siteTraffic
+    :model/type :model.type/siteUsage
     :model/userCount 100
     :model/meanPayloadSize 100
     :model/meanSecsBetweenHits 10}])
@@ -60,8 +60,54 @@
       (util/tx-ent model-id)))
 
 ;; ===========================================================
-;; activity for this sim
+;; create stuff
 
-(def trading-test (sim/create-test sim-conn site-user-model
-                                   {:db/id (d/tempid :test)
-                                    :test/duration (util/hours->msec 4)}))
+;; activity for this sim
+(def site-usage-test
+  (sim/create-test sim-conn site-user-model
+                   {:db/id (d/tempid :test)
+                    :test/duration (* 10 1000) ;;(util/hours->msec 1)
+                    }))
+
+;; sim
+(def site-usage-sim
+  (sim/create-sim sim-conn site-usage-test {:db/id (d/tempid :sim)
+                                            :sim/processCount 10}))
+
+;; codebase for the sim
+(defn assoc-codebase-tx [entities]
+  (let [codebase (util/gen-codebase)
+        cid (:db/id codebase)]
+    (cons
+     codebase
+     (mapv #(assoc {:db/id (:db/id %)} :source/codebase cid) entities))))
+(d/transact sim-conn (assoc-codebase-tx [site-usage-test site-usage-sim]))
+
+;; action log for this sim
+(def action-log
+  (sim/create-action-log sim-conn site-usage-sim))
+
+;; clock for this sim
+(def sim-clock (sim/create-fixed-clock sim-conn site-usage-sim {:clock/multiplier 960}))
+
+;; ===========================================================
+;; run the sim
+
+(comment
+
+  (def pruns
+    (->> #(sim/run-sim-process sim-uri (:db/id site-usage-sim))
+         (repeatedly (:sim/processCount site-usage-sim))
+         (into [])))
+
+  ;; wait for sim to finish
+  (time
+   (mapv (fn [prun] @(:runner prun)) pruns))
+
+  )
+
+;; ===========================================================
+;; look at the results
+
+;; grab latest database value so we can validate each of the steps above
+(def simdb (d/db sim-conn))

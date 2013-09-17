@@ -12,6 +12,7 @@
 
                  [clj-http "0.7.6"]]
 
-  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.4"]]
+  :profiles {:dev {:dependencies [[org.clojure/tools.namespace "0.2.4"]
+                                  [org.clojure/tools.trace "0.7.6"]]
                    :source-paths ["dev"]}}
   :repl-options {:init (user/go)})

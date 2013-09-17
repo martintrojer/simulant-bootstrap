@@ -1,9 +1,11 @@
 (ns api-user-agent
   (:require [clojure.data.generators :as gen]
+            [clojure.set]
             [clj-http.client :as client]))
 
 ;; perform the actual actions
 
+;; this should go in the database
 (def my-ids (atom #{}))
 
 (def url "http://localhost:3000/data")
@@ -30,14 +32,17 @@
   (let [[{:keys [body status]} data] (post-some-data test)
         id (-> body read-string :id)
         {:keys [body]} (get-data id)]
-    ;; no assertion here -- just store this
-    (assert (= (:body data) (:body body)))
+    ;; no assertion here -- just store this somehow
+    ;; (assert (= (:body data) (:body body)))
     (swap! my-ids conj id)))
 
+(defn- get-a-id! []
+  (first
+   (clojure.set/difference @my-ids
+                           (swap! my-ids #(disj % (rand-nth (seq %)))))))
+
 (defn remove-some-data [test]
-  (when-let [id (rand-nth @my-ids)]
-    (delete-data id)
-    (swap! my-ids disj id)))
+  (delete-data (get-a-id!)))
 
 
 ;; (post-and-get-data nil)
