@@ -26,7 +26,31 @@
    {:db/id #db/id[:db.part/db]
     :db/ident :agent.type/apiUser}
    {:db/id #db/id[:db.part/db]
-    :db/ident :action.type/putGet}
+    :db/ident :action.type/put}
+   {:db/id #db/id[:db.part/db]
+    :db/ident :action.type/get}
    {:db/id #db/id[:db.part/db]
     :db/ident :action.type/delete}]]
+
+ :api-user-data
+ [[{:db/id #db/id[:db.part/db]
+    :db/ident :agent/siteIds
+    :db/valueType :db.type/long
+    :db/cardinality :db.cardinality/many
+    :db.install/_attribute :db.part/db}
+   {:db/id #db/id[:db.part/db]
+    :db/ident :action/payload
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db.install/_attribute :db.part/db}
+   {:db/id #db/id[:db.part/db]
+    :db/ident :action/sitePayload
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db.install/_attribute :db.part/db}
+   {:db/id #db/id[:db.part/db]
+    :db/ident :action/siteId
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one
+    :db.install/_attribute :db.part/db}]]
  }

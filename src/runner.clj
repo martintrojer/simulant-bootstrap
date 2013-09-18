@@ -52,7 +52,7 @@
   [{:db/id model-id
     :model/type :model.type/siteUsage
     :model/userCount 100
-    :model/meanPayloadSize 100
+    :model/meanPayloadSize 2
     :model/meanSecsBetweenHits 10}])
 
 (def site-user-model
@@ -94,6 +94,20 @@
 ;; run the sim
 
 (comment
+
+  (d/q '[:find ?type
+         :where
+         [?e :agent/actions ?actions]
+         [?e :agent/type ?type]]
+       simdb)
+
+  (d/q '[:find ?e
+         :where
+         [_ :model/tests ?e]
+         [?e :test/type ?type]
+         ]
+       simdb)
+
 
   (def pruns
     (->> #(sim/run-sim-process sim-uri (:db/id site-usage-sim))

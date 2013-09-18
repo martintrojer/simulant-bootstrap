@@ -1,49 +1,32 @@
 (ns api-user-agent
-  (:require [clojure.data.generators :as gen]
-            [clojure.set]
-            [clj-http.client :as client]))
+  (:require [clj-http.client :as client]))
 
 ;; perform the actual actions
 
-;; this should go in the database
-(def my-ids (atom #{}))
-
 (def url "http://localhost:3000/data")
 
-(defn post-some-data [test]
-  (let [;; this is coming from the test?
-        data (zipmap (gen/vec gen/string) (gen/vec gen/anything))]
-    [(client/put url {:body (pr-str data) :content-type :edn :throw-entire-message? true})
-     data]))
+(defn- post-data [data]
+  (client/put url {:body data :content-type :edn :throw-entire-message? true}))
 
-(defn get-data [id]
-  (update-in
-   (client/get url {:query-params {:id id}})
-   [:body] read-string))
+(defn- get-data [id]
+  (client/get url {:query-params {:id id}}))
 
-(defn delete-data [id]
+(defn- delete-data [id]
   (client/delete url {:query-params {:id id}}))
 
-;; stuff we also want to capture in the sim results
-;; -- access times (get / put / delete)
-;; -- size of site/store, value of site/ctr
+;; -----
 
-(defn post-and-get-data [test]
-  (let [[{:keys [body status]} data] (post-some-data test)
-        id (-> body read-string :id)
-        {:keys [body]} (get-data id)]
-    ;; no assertion here -- just store this somehow
-    ;; (assert (= (:body data) (:body body)))
-    (swap! my-ids conj id)))
+(def ^:private get-an-id #(-> % :agent/_actions first :agent/siteIds seq rand-nth))
 
-(defn- get-a-id! []
-  (first
-   (clojure.set/difference @my-ids
-                           (swap! my-ids #(disj % (rand-nth (seq %)))))))
+(defn post-some-data [action]
+  (let [{:keys [body status]} (post-data (:action/payload action))]
+    (-> body read-string :id)))
 
-(defn remove-some-data [test]
-  (delete-data (get-a-id!)))
+(defn get-some-data [action]
+  (let [id (get-an-id action)]
+    [id (get-data id)]))
 
-
-;; (post-and-get-data nil)
-;; (remove-some-data nil)
+(defn remove-some-data [action]
+  (let [id (get-an-id action)]
+    (delete-data id)
+    id))
