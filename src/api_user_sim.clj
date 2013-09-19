@@ -1,5 +1,6 @@
 (ns api-user-sim
   (:require [api-user-agent :refer [post-some-data get-some-data remove-some-data]]
+            [db]
             [clojure.data.generators :as gen]
             [simulant.sim :as sim]
             [simulant.util :as util]
@@ -95,26 +96,27 @@
 
 (defmethod sim/perform-action :action.type/put
   [action process]
-  (let [id (do-action action process post-some-data)]
-    ;; transact id
-    ;; :action/siteId
-    ;; :agent/siteIds
-    ))
+  (let [site-id (do-action action process post-some-data)
+        agent (-> action :agent/_actions first)]
+    (when site-id
+      @(d/transact db/sim-conn [{:db/id (:db/id action) :action/siteId site-id}
+                                {:db/id (:db/id agent) :agent/siteIds site-id}]))))
 
 (defmethod sim/perform-action :action.type/get
   [action process]
-  (let [[id data] (do-action action process get-some-data)]
-    ;; transact data
-    ;; :action/sitePayload
-    ))
+  (let [[site-id data] (do-action action process get-some-data)]
+    (when site-id
+      @(d/transact db/sim-conn [{:db/id (:db/id action)
+                                 :action/sitePayload (pr-str data)
+                                 :action/siteId site-id}]))))
 
 (defmethod sim/perform-action :action.type/delete
   [action process]
-  (let [id (do-action action process remove-some-data)]
-    ;; retract id
-    ;; :action/siteId
-    ;; :agent/siteIds
-    ))
+  (let [site-id (do-action action process remove-some-data)
+        agent (-> action :agent/_actions first)]
+    (when site-id
+      @(d/transact db/sim-conn [[:db/add (:db/id action) :action/siteId site-id]
+                                [:db/retract (:db/id agent) :agent/siteIds site-id]]))))
 
 ;; -------------------
 
@@ -135,12 +137,16 @@
             [?e :action/type :action.type/put]]
           runner/simdb)))
 
-  (let [act-eid (d/entity runner/simdb (first act))
-        id (post-some-data act-eid)
-        agent (-> act-eid :agent/_actions first)]
-    @(d/transact sim-conn [{:db/id (d/tempid :test)
-                            :action/}])
-    )
+  (d/ident runner/simdb (d/entity runner/simdb (first act)))
+
+  (let [action (d/entity runner/simdb (first act))
+        site-id (post-some-data action)
+        agent (-> action :agent/_actions first)]
+    @(d/transact db/sim-conn [[:db/add (:db/id action) :action/siteId site-id]
+                              {:db/id (:db/id agent) :agent/siteIds site-id}]))
+
+  (let [action (d/entity (d/db db/sim-conn) (first act))]
+    (-> action :agent/_actions first :agent/siteIds seq rand-nth))
 
 
 

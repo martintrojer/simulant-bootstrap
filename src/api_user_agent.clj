@@ -1,5 +1,7 @@
 (ns api-user-agent
-  (:require [clj-http.client :as client]))
+  (:require [clj-http.client :as client]
+            [datomic.api :as d]
+            [db]))
 
 ;; perform the actual actions
 
@@ -16,17 +18,24 @@
 
 ;; -----
 
-(def ^:private get-an-id #(-> % :agent/_actions first :agent/siteIds seq rand-nth))
+;; (def ^:private get-an-id #(-> % :agent/_actions first :agent/siteIds seq rand-nth))
+
+(defn- get-an-id [action]
+  (let [latest-action (d/entity (d/db db/sim-conn) (:db/id action))]
+    (-> latest-action :agent/_actions first :agent/siteIds seq rand-nth)))
 
 (defn post-some-data [action]
   (let [{:keys [body status]} (post-data (:action/payload action))]
+    (println "posted some data:" (-> body read-string :id))
     (-> body read-string :id)))
 
 (defn get-some-data [action]
-  (let [id (get-an-id action)]
+  (when-let [id (get-an-id action)]
+    (println "got some data:" id)
     [id (get-data id)]))
 
 (defn remove-some-data [action]
-  (let [id (get-an-id action)]
+  (when-let [id (get-an-id action)]
+    (println "remove some data:" id)
     (delete-data id)
     id))
