@@ -51,7 +51,7 @@
   [test api-user at-time]
   (let [model (-> test :model/_tests first)
         size (gen/geometric (/ 1 (:model/meanPayloadSize model)))
-        payload (zipmap (gen/vec gen/string size) (gen/vec gen/anything size))
+        payload (zipmap (gen/vec gen/scalar size) (gen/vec gen/scalar size))
         usage {:db/id (d/tempid :test)
                :agent/_actions (util/e api-user)
                :action/atTime at-time
@@ -114,68 +114,6 @@
   [action process]
   (let [site-id (do-action action process remove-some-data)
         agents (-> action :agent/_actions)]
-    (when (> (count agents) 1)
-      (println "** uh-oh... to many agents" (count agents)))
     (when site-id
       @(d/transact db/sim-conn [[:db/add (:db/id action) :action/siteId site-id]
                                 [:db/retract (:db/id (first agents)) :agent/siteIds site-id]]))))
-
-;; -------------------
-
-(comment
-
-  (def an-action
-    (ffirst
-     (d/q '[:find ?actions
-            :where
-            [?e :agent/actions ?actions]]
-          (d/db db/sim-conn))))
-
-  (def an-agent
-    (ffirst
-     (d/q '[:find ?e
-            :where
-            [?e :agent/actions ?actions]]
-          (d/db db/sim-conn))))
-
-  (d/q `[:find ?ids
-         :where
-         [~an-agent :agent/siteIds ?ids]]
-       (d/db db/sim-conn))
-
-  @(d/transact db/sim-conn [[:db/add an-agent :agent/siteIds 1]])
-  @(d/transact db/sim-conn [[:db/retract an-agent :agent/siteIds 0]])
-
-
-
-  ;; --------
-
-  (d/q '[:find ?type
-         :where
-         [?e :action/atTime ?time]
-         [?e :action/type ?type]]
-       runner/simdb)
-
-  ;; get an action
-
-  (def act
-    (second
-     (d/q '[:find ?e
-            :where
-            [?e :action/type :action.type/put]]
-          runner/simdb)))
-
-  (d/ident runner/simdb (d/entity runner/simdb (first act)))
-
-  (let [action (d/entity runner/simdb (first act))
-        site-id (post-some-data action)
-        agent (-> action :agent/_actions first)]
-    @(d/transact db/sim-conn [[:db/add (:db/id action) :action/siteId site-id]
-                              {:db/id (:db/id agent) :agent/siteIds site-id}]))
-
-  (let [action (d/entity (d/db db/sim-conn) (first act))]
-    (-> action :agent/_actions first :agent/siteIds seq rand-nth))
-
-
-
-  )

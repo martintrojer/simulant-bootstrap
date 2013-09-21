@@ -24,16 +24,16 @@
 
 (defn post-some-data [action]
   (let [{:keys [body status]} (post-data (:action/payload action))]
-    (println "posted some data:" (-> body read-string :id))
+    ;; (println "posted some data:" (-> body read-string :id))
     (-> body read-string :id)))
 
 (defn get-some-data [action]
   (when-let [id (get-an-id action)]
-    (println "got some data:" id)
+    ;; (println "got some data:" id)
     [id (get-data id)]))
 
 (defn remove-some-data [action]
   (when-let [id (get-an-id action)]
-    (println "remove some data:" id)
+    ;; (println "remove some data:" id)
     (delete-data id)
     id))

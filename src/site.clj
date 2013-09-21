@@ -1,8 +1,9 @@
 (ns site
   (:require [compojure.core :refer (defroutes GET PUT DELETE)]
-            [compojure.handler :as handler]
             [compojure.route :as route]
-            [ring.middleware.edn :as ring-edn]))
+            [ring.middleware.edn :as ring-edn]
+            [ring.middleware.keyword-params]
+            [ring.middleware.params]))
 
 (def id-ctr (ref 0))
 (def store (ref {}))
@@ -36,16 +37,20 @@
 
 (defroutes app-routes
   (GET "/" [] (generate-response :ok))
+  (GET "/liveids" [] (generate-response (live-ids)))
   (GET "/data" {params :params} (get-data params))
   (PUT "/data" {params :params} (store-data params))
   (DELETE "/data" {params :params} (remove-data params))
   (route/not-found (generate-response :not-found)))
 
 (def the-site
-  (-> (handler/api app-routes)
-      (ring-edn/wrap-edn-params)))
+  (-> app-routes
+      (ring-edn/wrap-edn-params)
+      (ring.middleware.keyword-params/wrap-keyword-params)
+      (ring.middleware.params/wrap-params)))
 
 ;; curl -X GET http://localhost:3000
 ;; curl -X PUT -H "Content-Type: application/edn" -d '{:name :barnabas}' http://localhost:3000/data
 ;; curl -X GET http://localhost:3000/data?id=1
 ;; curl -X DELETE http://localhost:3000/data?id=1
+;; curl -X GET http://localhost:3000/liveids
