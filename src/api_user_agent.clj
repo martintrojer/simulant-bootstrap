@@ -18,8 +18,6 @@
 
 ;; -----
 
-;; (def ^:private get-an-id #(-> % :agent/_actions first :agent/siteIds seq rand-nth))
-
 (defn- get-an-id [action]
   (let [latest-action (d/entity (d/db db/sim-conn) (:db/id action))]
     (-> latest-action :agent/_actions first :agent/siteIds seq rand-nth)))

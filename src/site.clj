@@ -7,6 +7,9 @@
 (def id-ctr (ref 0))
 (def store (ref {}))
 
+(defn live-ids []
+  (->> @store keys (map read-string)))
+
 (defn generate-response [data & [status]]
   {:status (or status 200)
    :headers {"Content-Type" "application/edn"}

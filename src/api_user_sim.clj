@@ -107,20 +107,48 @@
   (let [[site-id data] (do-action action process get-some-data)]
     (when site-id
       @(d/transact db/sim-conn [{:db/id (:db/id action)
-                                 :action/sitePayload (pr-str data)
+                                 :action/sitePayload (:body data)
                                  :action/siteId site-id}]))))
 
 (defmethod sim/perform-action :action.type/delete
   [action process]
   (let [site-id (do-action action process remove-some-data)
-        agent (-> action :agent/_actions first)]
+        agents (-> action :agent/_actions)]
+    (when (> (count agents) 1)
+      (println "** uh-oh... to many agents" (count agents)))
     (when site-id
       @(d/transact db/sim-conn [[:db/add (:db/id action) :action/siteId site-id]
-                                [:db/retract (:db/id agent) :agent/siteIds site-id]]))))
+                                [:db/retract (:db/id (first agents)) :agent/siteIds site-id]]))))
 
 ;; -------------------
 
 (comment
+
+  (def an-action
+    (ffirst
+     (d/q '[:find ?actions
+            :where
+            [?e :agent/actions ?actions]]
+          (d/db db/sim-conn))))
+
+  (def an-agent
+    (ffirst
+     (d/q '[:find ?e
+            :where
+            [?e :agent/actions ?actions]]
+          (d/db db/sim-conn))))
+
+  (d/q `[:find ?ids
+         :where
+         [~an-agent :agent/siteIds ?ids]]
+       (d/db db/sim-conn))
+
+  @(d/transact db/sim-conn [[:db/add an-agent :agent/siteIds 1]])
+  @(d/transact db/sim-conn [[:db/retract an-agent :agent/siteIds 0]])
+
+
+
+  ;; --------
 
   (d/q '[:find ?type
          :where
