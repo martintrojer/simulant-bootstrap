@@ -1,6 +1,8 @@
 {:model
- [[{:db/id #db/id[:db.part/db]
+ [[;; We are modelling site usage simulation
+   {:db/id #db/id[:db.part/db]
     :db/ident :model.type/siteUsage}
+   ;; Configuration parameters for the model
    {:db/id #db/id[:db.part/db]
     :db/ident :model/userCount
     :db/valueType :db.type/long
@@ -21,10 +23,13 @@
     :db.install/_attribute :db.part/db}]]
 
  :test
- [[{:db/id #db/id[:db.part/db]
+ [[;; One type of test
+   {:db/id #db/id[:db.part/db]
     :db/ident :test.type/putGetDelte}
+   ;; One type of agent (simulating a user)
    {:db/id #db/id[:db.part/db]
     :db/ident :agent.type/apiUser}
+   ;; Three type of actions
    {:db/id #db/id[:db.part/db]
     :db/ident :action.type/put}
    {:db/id #db/id[:db.part/db]
@@ -33,21 +38,26 @@
     :db/ident :action.type/delete}]]
 
  :api-user-data
- [[{:db/id #db/id[:db.part/db]
+ [[;; The set of Ids a agent have gotten back from the site
+   {:db/id #db/id[:db.part/db]
     :db/ident :agent/siteIds
     :db/valueType :db.type/long
     :db/cardinality :db.cardinality/many
     :db.install/_attribute :db.part/db}
+   ;; The payload to be sent TO the site in a put action
    {:db/id #db/id[:db.part/db]
     :db/ident :action/payload
     :db/valueType :db.type/string
     :db/cardinality :db.cardinality/one
     :db.install/_attribute :db.part/db}
+   ;; The payload returned FROM the site in a get action
    {:db/id #db/id[:db.part/db]
     :db/ident :action/sitePayload
     :db/valueType :db.type/string
     :db/cardinality :db.cardinality/one
     :db.install/_attribute :db.part/db}
+   ;; The Id returned FROM the site in a put action, and send TO the site
+   ;; in a get/delete action
    {:db/id #db/id[:db.part/db]
     :db/ident :action/siteId
     :db/valueType :db.type/long

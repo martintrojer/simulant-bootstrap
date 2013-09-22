@@ -1,7 +1,7 @@
 (ns site
   (:require [compojure.core :refer (defroutes GET PUT DELETE)]
             [compojure.route :as route]
-            [ring.middleware.edn :as ring-edn]
+            [ring.middleware.edn]
             [ring.middleware.keyword-params]
             [ring.middleware.params]))
 
@@ -45,7 +45,7 @@
 
 (def the-site
   (-> app-routes
-      (ring-edn/wrap-edn-params)
+      (ring.middleware.edn/wrap-edn-params)
       (ring.middleware.keyword-params/wrap-keyword-params)
       (ring.middleware.params/wrap-params)))
 
