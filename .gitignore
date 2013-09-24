@@ -1,4 +1,6 @@
 /target
+site/target
+sim/target
 /lib
 /classes
 /checkouts
@@ -10,3 +12,4 @@ pom.xml.asc
 .lein-failures
 .lein-plugins
 .lein-repl-history
+.nrepl-port
