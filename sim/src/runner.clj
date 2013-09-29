@@ -58,7 +58,7 @@
 ;; sim
 (def site-usage-sim
   (sim/create-sim db/sim-conn site-usage-test {:db/id (d/tempid :sim)
-                                            :sim/processCount 10}))
+                                               :sim/processCount 10}))
 
 ;; codebase for the sim
 (defn assoc-codebase-tx [entities]
@@ -105,6 +105,7 @@
   ;; ... this is the payloads still in the site (i.e. not removed)
 
   (def site-ids
+    ;; note that this query is across all sims
     (->> (d/q '[:find ?id
                 :where
                 [_ :agent/siteIds ?id]]
